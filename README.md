@@ -19,7 +19,9 @@
 ### 4、安装Scikit-learn
 <div align="left"><img width="716" height="227" alt="08c3bad701c450f6727586af49e44514" src="https://github.com/user-attachments/assets/73ac3c01-c39c-411f-99d5-bc5b1b354e76" /><div>
 <div align="left"><img width="740" height="75" alt="057602808a7031565e1c5600c1f929d5" src="https://github.com/user-attachments/assets/e64169da-f8c1-41b5-823d-0c09b600f169" /><div>
+  
 ## 三、实验结果分析
 通过命令操作，成功安装四个主要必要内容，并检测是否成功安装。（详情见实验内容）
+
 ## 四、实验小结
 通过本次实验，安装初步环境，为后续的实验进行做好基础，并初步认识计算机视觉实验的基础环境，加深课上内容的理解。
