@@ -43,5 +43,6 @@
     通过设置较小的卷积核便于捕捉局部特征。
 
 ### 2、前向传播过程
+    
 <div align="left"><div>
 <div align="left"><div>
