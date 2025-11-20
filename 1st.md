@@ -1,4 +1,4 @@
-# 实验一
+# 实验一、环境配置
 
 ## 一、实验目的
 本次实验旨在搭建后续实验的操作环境，安装Anaconda，PyTorch，Opencv以及Scikit-learn等辅助后续学习。
