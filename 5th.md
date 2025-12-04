@@ -6,49 +6,141 @@
 ## 二、实验内容
 
 ### 2.1 导入实验所需的包及搭建环境
-<div align="left"><img width="800" height="350" alt="image" src="https://github.com/user-attachments/assets/4598d3a9-78ff-4d6b-8fa0-71a1f08330c9" />
-<div>
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+    import torch.optim as optim
+    from torchvision import datasets, transforms
+    import matplotlib.pyplot as plt
+
+    batch_size = 512
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
 
 ### 2.2 数据加载和预处理
-<div align="left"><img width="800" height="350" alt="image" src="https://github.com/user-attachments/assets/38617184-de05-470d-be43-2452d550c27d" />
-<div>
+    trainloader = torch.utils.data.DataLoader(
+        datasets.MNIST('data', train=True, download=True,transform=transforms.Compose([transforms.ToTensor()])),
+        batch_size=batch_size, shuffle=True
+    )
+
+    testloader = torch.utils.data.DataLoader(
+        datasets.MNIST('data', train=False, download=True, transform=transforms.Compose([transforms.ToTensor()])),
+        batch_size=batch_size, shuffle=True
+    )
+加载数据集以及自动预处理数据集。
 
 ### 2.3 定义LeNet神经网络模型
-<div align="left"><img width="800" height="350" alt="image" src="https://github.com/user-attachments/assets/cd9286b8-af34-4153-8433-a0ee9b9fae64" />
-<div>
+    class Net(nn.Module):
+        def __init__(self):
+            super(Net, self).__init__()
+            self.conv1 = nn.Conv2d(1, 6, 5, padding=2)  # 输入通道1，输出通道6，卷积核5x5
+            self.conv2 = nn.Conv2d(6, 16, 5)  # 输入通道6，输出通道16，卷积核5x5
+            self.fc1 = nn.Linear(16  * 5 * 5, 128)  # 全连接层，输入16*5*5=400，输出128
+            self.fc2 = nn.Linear(128, 84)  # 全连接层，输入128，输出84
+            self.clf = nn.Linear(84, 10)  # 分类层，输入84，输出10
+        def forward(self, x):
+            # conv1
+            x = self.conv1(x)
+            # 激活函数sigmoid()
+            x = F.sigmoid(x)
+            # 平均池化层，kernel=2x2，步长2
+            x = F.avg_pool2d(x, kernel_size=2, stride=2)
 
-### 2.4 前向传播过程
-<div align="left"><img width="800" height="700" alt="image" src="https://github.com/user-attachments/assets/22437990-092a-4c4e-96b8-2671b57f9ad1" />
-<div>
+            # conv2
+            x = self.conv2(x)
+            # 激活函数sigmoid()
+            x = F.sigmoid(x)
+            # 平均池化层，2x2，步长2
+            x = F.avg_pool2d(x, kernel_size=2, stride=2)
 
-### 2.5 模型训练循环
-<div align="left"><img width="800" height="350" alt="image" src="https://github.com/user-attachments/assets/e14930a9-4c8b-452c-88f3-8113a5a391fd" />
-<div>
+            # 展开，从第1维开始展开
+            x = x.view(x.size(0), -1)
+    
+            # 全连接层1
+            x = self.fc1(x)
+            # 激活函数sigmoid()
+            x = F.sigmoid(x)
 
-### 2.6 模型的测试和评估
-<div align="left"><img width="800" height="600" alt="image" src="https://github.com/user-attachments/assets/9ead0384-bd63-4968-bb6a-83a9dd955586" />
-<div>
+            # 全连接层2
+            x = self.fc2(x)
+            # 激活函数sigmoid()
+            x = F.sigmoid(x)
 
-### 2.7 特征图可视化
-<div align="left"><img width="800" height="700" alt="image" src="https://github.com/user-attachments/assets/b8c0a5ab-a9f5-4ffd-872c-a2507df1d3d5" />
-<div>
+            # 分类层
+            x = self.clf(x)
+            return x
+配置LeNet网络模型。
 
-### 实验结果
-<div align="left"><img width="800" height="700" alt="image" src="https://github.com/user-attachments/assets/2ca15500-ae87-4bb7-a258-ba4cdd9f0796" />
-<div>
+### 2.4 模型训练循环与评估
+    epochs = 30
+    accs, losses = [], []
+
+    for epoch in range(epochs):
+        for batch_idx, (x, y) in enumerate(trainloader):
+            x, y = x.to(device), y.to(device)
+            optimizer.zero_grad()
+            out = model(x)
+            loss = F.cross_entropy(out, y)
+            loss.backward()
+            optimizer.step()
+    
+        correct = 0
+        testloss = 0
+        with torch.no_grad():
+            for batch_idx, (x, y) in enumerate(testloader):
+                x, y = x.to(device), y.to(device)
+                out = model(x)
+                testloss += F.cross_entropy(out, y).item()
+                pred = out.max(dim=1, keepdim=True)[1]
+                correct += pred.eq(y.view_as(pred)).sum().item()
+
+        acc = correct / len(testloader.dataset)
+        testloss = testloss / (batch_idx + 1)
+        accs.append(acc)
+        losses.append(testloss)
+        print('epoch:{}, loss:{:.4f}, acc:{:.4f}'.format(epoch, testloss, acc))
+训练模型，同时在每次训练后输出每次训练的损失以及准确率。
+ 
+
+
+### 2.5 特征图可视化
+    # 可视化特征图
+    feature1 = F.sigmoid(model.conv1(x))
+    feature1 = F.avg_pool2d(feature1, kernel_size=2, stride=2)
+    feature2 = F.sigmoid(model.conv2(feature1))
+    feature2 = F.avg_pool2d(feature2, kernel_size=2, stride=2)
+
+    n = 5
+    img = x.detach().cpu().numpy()[:n]
+    feature_map1 = feature1.detach().cpu().numpy()[:n]
+    feature_map2 = feature2.detach().cpu().numpy()[:n]
+
+    fig, ax = plt.subplots(3, n, figsize=(10, 10))
+    for i in range(n):
+        ax[0, i].imshow(img[i].sum(0), cmap='gray')
+        ax[0, i].axis('off')
+        ax[1, i].imshow(feature_map1[i].sum(0), cmap='gray')
+        ax[1, i].axis('off')
+        ax[2, i].imshow(feature_map2[i].sum(0), cmap='gray')
+        ax[2, i].axis('off')
+    plt.show()
+
+
+
 
 ## 三、实验结果与分析
-### 1、Letnet神经网络模型
-    通道数由1→6→16逐步增加，符合特征提取的渐进性原则。
-    通过设置较小的卷积核便于捕捉局部特征。
 
-### 2、前向传播过程
-    通过第一和第二卷积块，分别执行提取图像基础特征，降维并增强特征鲁棒性以及组合基础特征形成复杂模式并进一步压缩特征尺寸。
-    完成特征展平，将二位特征图转换为一维向量，为分类做准备。
-    构建全连接层，整合所有特征信息，逐步提炼最具判别性的特征。
+<div align="left"><img width="500" height="250" alt="image" src="https://github.com/user-attachments/assets/faa5653e-5fc5-434a-8a72-b582721e2f87" />
+<div>
+部分模型训练输出
 
-### 3、训练模型
-    经过数据迁移，梯度清零，前向传播，计算损失，反向传播以及参数更新几步后，重复训练，多次悬链调整模型，使其能够准确辨别手写数字。
+由输出可见模型损失小，准确率高，可得模型有充分的可行性。
 
+
+<div align="left"><img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/4d9ce284-2f9a-4a8f-88d4-c877b78eef1a" />
+
+<div>
+分别输出输入图，第一层卷积，sigmoid和池化后的特征图，第两层卷积，sigmoid和池化后的特征图。
+    
 ## 四、实验小结
 通过本次实验掌握了如何构建与使用神经网络，进一步加深了对于课上内容的理解，巩固了课上的知识，为后续学习打下了扎实的基础。
