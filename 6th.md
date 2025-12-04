@@ -102,5 +102,9 @@
 统计性能指标，将批次损失累加，统计正确预测样本，计算准确率以及平均损失，保存每个epoch的性能指标，并将其可视化输出。
 
 ## 三、实验结果与分析
-<div ailgn="left"><img width="1000" height="500" alt="image" src="https://github.com/user-attachments/assets/79e6e56b-eb25-4c5c-80de-69fad37f80ec" />
+<div ailgn="left"><img width="600" height="380" alt="image" src="https://github.com/user-attachments/assets/82efad3e-b280-497c-bd23-5ca3871aa6f6" />
 <div>
+模型训练所得结果尚可，最高准确率达到84%，损失达到0.4354，但所得损失以及准确率波动较大，推测是训练量以及训练轮次太少。
+
+## 四、实验小结
+本次实验完成了通过Inception-v3 模型对数据集进行图像分类，初步理解图像分类的工作流程，加深了对于课上内容的印象，为后续学习打下了扎实的基础。
